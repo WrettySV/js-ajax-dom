@@ -22,15 +22,15 @@ function createSquare(event: PointerEvent) {
 
     draggedSquare = square;
 
-    console.log('position ', draggedSquare.style.position);
-
     square.setPointerCapture(event.pointerId);
-    square.addEventListener('pointermove', dragSquare);
-    square.addEventListener('pointerup', dropSquare);
+    document.body.append(square);
+    document.addEventListener('pointermove', dragSquare);
+    document.addEventListener('pointerup', dropSquare);
 }
 
 function dragSquare(event: PointerEvent) {
     event.preventDefault();
+    console.log("drag process");
     if (draggedSquare != null) {
         draggedSquare.classList.add('dragged');
         draggedSquare.style.left = `${event.clientX - 50}px`;
@@ -40,11 +40,12 @@ function dragSquare(event: PointerEvent) {
 
 function dropSquare(event: PointerEvent) {
     event.preventDefault();
+    console.log("drop process");
     if (draggedSquare) {
         draggedSquare.classList.remove('dragged');
         draggedSquare.releasePointerCapture(event.pointerId);
-        draggedSquare.removeEventListener('pointermove', dragSquare);
-        draggedSquare.removeEventListener('pointerup', dropSquare);
+        document.removeEventListener('pointermove', dragSquare);
+        document.removeEventListener('pointerup', dropSquare);
 
         const isInsideGrid = isInsideElement(event.clientX, event.clientY, gridDropZone);
         const isInsideFixed = isInsideElement(event.clientX, event.clientY, fixedDropZone);
@@ -73,6 +74,15 @@ function dropFixed(event: PointerEvent) {
     console.log('fixedGrid');
     event.preventDefault();
     if (draggedSquare != null) {
+        const rect = draggedSquare.getBoundingClientRect();
+        const parentRect = fixedDropZone.getBoundingClientRect();
+
+        const relativeLeft = rect.left - parentRect.left;
+        const relativeTop = rect.top - parentRect.top;
+
+        draggedSquare.style.left = `${relativeLeft}px`;
+        draggedSquare.style.top = `${relativeTop}px`;
+
         fixedDropZone.appendChild(draggedSquare);
     }
 }
